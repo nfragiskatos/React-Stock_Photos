@@ -17,12 +17,17 @@ function App () {
 		try {
 			const response = await fetch(url);
 			const data = await response.json();
-			console.log(data);
 			setPhotos(data);
+			setLoading(false);
 		} catch (error) {
 			setLoading(false);
 			console.log(error);
 		}
+	};
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		console.log('hello');
 	};
 
 	useEffect(() => {
@@ -30,17 +35,23 @@ function App () {
 	}, []);
 
 	return (
-		<section className='section'>
-			<article className='photos photos-center'>
-				{photos.map((photo) => {
-					return (
-						<div key={photo.id} className='photo'>
-							<img src={photo.urls.small} alt={photo.alt_description} />
-						</div>
-					);
-				})}
-			</article>
-		</section>
+		<main>
+			<section className='search'>
+				<form className='search-form'>
+					<input type='text' placeholder='search' className='form-input' />
+					<button type='submit' className='submit-btn' onClick={handleSubmit}>
+						<FaSearch />
+					</button>
+				</form>
+			</section>
+			<section className='photos'>
+				<div className='photos-center'>
+					{photos.map((photo) => {
+						return <Photo key={photo.id} {...photo} />;
+					})}
+				</div>
+			</section>
+		</main>
 	);
 }
 
