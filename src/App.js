@@ -50,6 +50,7 @@ function App () {
 						return <Photo key={photo.id} {...photo} />;
 					})}
 				</div>
+				{loading && <h2 className='loading'>Loading...</h2>}
 			</section>
 		</main>
 	);
