@@ -10,17 +10,28 @@ function App () {
 	const [ loading, setLoading ] = useState(false);
 	const [ photos, setPhotos ] = useState([]);
 	const [ page, setPage ] = useState(1);
+	const [ searchTerm, setSearchTerm ] = useState('');
+	const [ currentQuery, setCurrentQuery ] = useState('');
 
 	const fetchImages = async () => {
 		setLoading(true);
 		let url;
 		const urlPage = `&page=${page}`;
-		url = `${mainUrl}${clientID}${urlPage}`;
+		const urlQuery = `&query=${currentQuery}`;
+		if (currentQuery) {
+			url = `${searchUrl}${clientID}${urlPage}${urlQuery}`;
+		} else {
+			url = `${mainUrl}${clientID}${urlPage}`;
+		}
+
 		try {
 			const response = await fetch(url);
 			const data = await response.json();
 			setPhotos((oldPhotos) => {
-				return [ ...oldPhotos, ...data ];
+				if (currentQuery) {
+					return page === 1 ? data.results : [ ...oldPhotos, ...data.results ];
+				}
+				return page === 1 ? data : [ ...oldPhotos, ...data ];
 			});
 			setLoading(false);
 		} catch (error) {
@@ -31,7 +42,7 @@ function App () {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('hello');
+		setCurrentQuery(searchTerm);
 	};
 
 	useEffect(
@@ -39,6 +50,17 @@ function App () {
 			fetchImages();
 		},
 		[ page ]
+	);
+
+	useEffect(
+		() => {
+			if (page === 1) {
+				fetchImages();
+			} else {
+				setPage(1);
+			}
+		},
+		[ currentQuery ]
 	);
 
 	useEffect(() => {
@@ -54,7 +76,15 @@ function App () {
 		<main>
 			<section className='search'>
 				<form className='search-form'>
-					<input type='text' placeholder='search' className='form-input' />
+					<input
+						type='text'
+						placeholder='search'
+						className='form-input'
+						value={searchTerm}
+						onChange={(e) => {
+							setSearchTerm(e.target.value.trim());
+						}}
+					/>
 					<button type='submit' className='submit-btn' onClick={handleSubmit}>
 						<FaSearch />
 					</button>
